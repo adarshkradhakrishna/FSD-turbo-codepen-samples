@@ -1,0 +1,10 @@
+# <type>(<scope>): <subject>
+#
+# Types: feat | fix | docs | refactor | test | chore | ci | build
+#
+# Example:
+# feat(auth): add OTP verification
+#
+# Body (required for feat/fix):
+#
+#
