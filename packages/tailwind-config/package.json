@@ -1,0 +1,13 @@
+{
+    "name": "@repo/tailwind-config",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "description": "this lib will help to share the common UI and tailwind config",
+    "exports":{
+        "./postcss.config": "./postcss.config.mjs",
+        "./styles": "./styles.css",
+        "./global": "./global.css",
+        ".": "./tailwind.config.ts"
+    }
+}
