@@ -1,0 +1,61 @@
+@property --spine-shift {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0px;
+}
+
+@property --page-rotate {
+    syntax: "<angle>";
+    inherits: true;
+    initial-value: 0deg;
+}
+
+.scene {
+    perspective: 2000px;
+    transform-style: preserve-3d;
+    position: relative;
+    background-image: url("https://images.unsplash.com/photo-1763152496539-302ef51ef66f?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    background-position: center;
+    background-size: cover;
+    background-blend-mode: overlay;
+}
+
+.typo {
+    mix-blend-mode: "exclusion";
+}
+
+.book-3d {
+    width: 250px;
+    height: 350px;
+    perspective: 2000px;
+    transform-style: preserve-3d;
+    z-index: 10;
+    --spine-shift: 0px;
+    transform: translateX(var(--spine-shift));
+    transition: --spine-shift 0.5s ease;
+}
+
+.book-3d.book-open {
+    --spine-shift: 100px;
+}
+
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 350px;
+    perspective: 2000px;
+    transform-style: preserve-3d;
+    transform-origin: left center;
+    --page-rotate: 0deg;
+    transform: rotateY(var(--page-rotate));
+    transition: --page-rotate 0.5s ease-in-out, z-index 0s;
+    z-index: calc(10 - var(--i));
+}
+
+.page.page-open {
+    --page-rotate: -180deg;
+    transition-delay: 0s, 0s;
+    z-index: calc(20 + var(--i));
+}
