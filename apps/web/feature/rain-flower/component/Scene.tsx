@@ -12,7 +12,7 @@ function CanvasScene() {
        if(!canvasRef.current) return
         const plantSystem = new PlantSystem()
         const rainSystem = new RainSystem(canvasRef.current.getBoundingClientRect().width, plantSystem, canvasRef.current.getBoundingClientRect().height)
-       const engine = new CanvasEngine(canvasRef.current,[rainSystem])
+       const engine = new CanvasEngine(canvasRef.current,[rainSystem,plantSystem])
        engine.start()
        return()=>{
         engine.stop()

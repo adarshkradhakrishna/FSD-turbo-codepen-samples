@@ -4,6 +4,8 @@ import { BranchNode } from "./Branch";
 
 const maxDepth = 3
 
+let count = 1 ;
+
 export class Plant {
     rootX: number;
     rootY: number;
@@ -11,7 +13,7 @@ export class Plant {
 
     constructor(x: number, y: number) {
         this.rootX = x;
-        this.rootY = y
+        this.rootY = y;
         const rootBranch = new BranchNode(this.rootX, this.rootY,0);
         rootBranch.generateChildrenRecursively(maxDepth);
         this.allBranches = rootBranch;
@@ -20,10 +22,20 @@ export class Plant {
     draw(ctx: CanvasRenderingContext2D) {
         ctx.beginPath()
         ctx.moveTo(this.rootX, this.rootY)
-        this.drawPlant(ctx, this.allBranches);
+        if (this.allBranches.isSubtreeFullyDrawn){
+            this.drawPlant(ctx, this.allBranches);
+        }
+        else{
+            this.allBranches.drawProgressively(ctx)
+        }
+       
+    }
+
+    update(dt: number) {
+        
     }
 
     drawPlant(ctx: CanvasRenderingContext2D, branch: BranchNode) {
-        branch.draw(ctx)
+        branch.drawCompleteTreeRecursively(ctx)
     }
 }

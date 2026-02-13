@@ -16,6 +16,7 @@ export class RainSystem extends System {
 
     draw(ctx: CanvasRenderingContext2D): void {
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+        
         this.drops.forEach((drop) => {
             drop.draw(ctx)
         })
@@ -23,6 +24,7 @@ export class RainSystem extends System {
 
     update(dt: number): void {
         this.drops.forEach((drop) => {
+            if(drop.collideState?.isDead) return
             const collideDrops = drop.update(dt)
             if (collideDrops && collideDrops.x && collideDrops.y) {
                 const plant = new Plant(collideDrops.x, collideDrops.y)

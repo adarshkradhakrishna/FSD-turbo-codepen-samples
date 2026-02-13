@@ -1,10 +1,10 @@
 import { MARGIN } from "../../../constant";
 import { CollideParticles } from "./collideParticles";
 
-const MIN_SPEED = 4;
-const MAX_SPEED =10;
-const MAX_LENGTH = 20
-const MIN_LENGTH = 10
+const MIN_SPEED = 8;
+const MAX_SPEED =15;
+const MAX_LENGTH = 30
+const MIN_LENGTH = 20
 const GRAVITY = 0.98
 
 class RainDrop {
@@ -17,7 +17,7 @@ class RainDrop {
     collideState?:CollideParticles
     height:number;
     constructor(width:number,height:number) {
-        this.collideState = new CollideParticles()
+        // this.collideState = new CollideParticles()
         this.reset(width)
         this.width = width
         this.height = height
@@ -29,6 +29,7 @@ class RainDrop {
         this.speed = Math.floor(Math.random() * (MAX_SPEED - MIN_SPEED + 1)) + MIN_SPEED
         this.length = Math.floor(Math.random() * (MAX_LENGTH - MIN_LENGTH + 1)) + MIN_LENGTH
         this.isCollide=false
+        this.collideState = new CollideParticles()
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -54,8 +55,9 @@ class RainDrop {
        if(this.isCollide) {
            this.collideState!.update(dt)
            if (this.collideState!.isDead) {
+               const pos = { x: this.x, y: window.innerHeight }
                this.reset(this.width)
-               return {x:this.x,y:this.y}
+               return pos;
            }
           return
        }
