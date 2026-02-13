@@ -7,3 +7,17 @@
 @tailwind components;
 @tailwind utilities;
 
+
+.scene {
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to bottom,
+            #9be7b2 0%,
+            #bfeec6 50%,
+            #e5f1a8 100%);
+}
+
+
+.rain-flower-scene {
+    background-color: #F6F2E5;
+}
