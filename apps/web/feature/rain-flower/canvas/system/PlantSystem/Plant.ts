@@ -4,12 +4,12 @@ import { BranchNode } from "./Branch";
 
 const maxDepth = 3
 
-let count = 1 ;
 
 export class Plant {
     rootX: number;
     rootY: number;
     allBranches: BranchNode;
+
 
     constructor(x: number, y: number) {
         this.rootX = x;
@@ -31,11 +31,29 @@ export class Plant {
        
     }
 
-    update(dt: number) {
-        
+    applyImpulse(strength: number) {
+        this.allBranches.applyImpulse(strength);
     }
 
+    applyMouseInteraction(mouseX: number, mouseY: number, mouseVelocity: number) {
+        this.allBranches.applyImpulseRecursively(
+            mouseX,
+            mouseY,
+            mouseVelocity
+        );
+    }
+
+    update(dt: number) {
+        this.allBranches.update(dt);
+    }
+
+    
     drawPlant(ctx: CanvasRenderingContext2D, branch: BranchNode) {
         branch.drawCompleteTreeRecursively(ctx)
     }
+
+    hasAnyFlower(): boolean {
+        return this.allBranches.hasFlowerInSubtree();
+    }
+    
 }

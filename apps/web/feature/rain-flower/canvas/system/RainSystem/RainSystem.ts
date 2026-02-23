@@ -9,7 +9,7 @@ export class RainSystem extends System {
     height: number
     constructor(width: number, plantSystem: PlantSystem, height:number ,drops?: RainDrop[]) {
         super()
-        this.drops = drops || Array.from({ length: 1 }, () => new RainDrop(width,height))
+        this.drops = drops || Array.from({ length: 10 }, () => new RainDrop(width,height))
         this.plants = plantSystem
         this.height = height
     }

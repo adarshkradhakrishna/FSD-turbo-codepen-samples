@@ -50,12 +50,15 @@ function getQuadraticTangent(p0: { x: number, y: number }, p1: { x: number, y: n
     };
 }
 
+
 const minFlowerPostionDepth = 3
 
 
 
 
+
 export class BranchNode {
+
     P0: { x: number, y: number }
     P1: { x: number, y: number }
     P2: { x: number, y: number }
@@ -68,20 +71,107 @@ export class BranchNode {
     name:string;
     flower: null | Flower
 
+    angle:number =0;
+    angularVelocity: number =0;
+    damping:number = 0.99
+    stiffness: number = 0.03
+
 
     constructor(starX: number, startY: number, depth: number, direction?: { x: number, y: number }) {
         this.P0 = { x: starX, y: startY }
         this.children = []
         this.depth = depth;
+        this.hasFlower = Boolean(this.depth >= 3 && Math.random() > 0.5)
         //this.hasFlower = this.depth > minFlowerPostionDepth &&  getRand(0,5) > minFlowerPostionDepth
-        this.hasFlower = true 
-        //his.depth > minFlowerPostionDepth
         const points = this.generateStem(this.P0, direction || baseDirectoin)
         this.P1 = points.p1
         this.P2 = points.p2
         this.length = points.length
         this.name=`branch-${depth}`
-        this.flower = this.hasFlower ? new Flower(this.P2.x, this.P2.y) : null
+        this.flower = this.hasFlower ? new Flower() : null
+    }
+
+
+    applyImpulse(strength: number) {
+        this.angularVelocity += strength * (1 + this.depth * 0.3);
+        for (const child of this.children) {
+            child.applyImpulse(strength);
+        }
+    }
+
+    applyImpulseRecursively(
+        mouseX: number,
+        mouseY: number,
+        mouseVelocity: number
+    ) {
+
+        const dx = mouseX - this.P2.x;
+        const dy = mouseY - this.P2.y;
+
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        const influenceRadius = 120;
+
+        if (distance < influenceRadius && Math.abs(mouseVelocity) > 5) {
+
+            const falloff = 1 - (distance / influenceRadius);
+
+            const impulseStrength = 0.0004;
+
+            this.angularVelocity +=
+                mouseVelocity * impulseStrength * falloff;
+        }
+
+        this.children.forEach(child =>
+            child.applyImpulseRecursively(
+                mouseX,
+                mouseY,
+                mouseVelocity
+            )
+        );
+    }
+
+    update(dt:number){
+        // Base values
+        const baseStiffness = 40;
+        const baseDamping = 12;
+        const baseMass = 1;
+
+        // Depth scaling
+        const depthFactor = this.depth;
+
+        // Strong trunk, soft tips
+        const stiffness = baseStiffness / depthFactor;
+        const damping = baseDamping / Math.sqrt(depthFactor);
+        const mass = baseMass * (1 / depthFactor);
+
+
+        // Spring torque
+        const springForce = -stiffness * this.angle;
+
+        // Damping torque
+        const dampingForce = -damping * this.angularVelocity;
+
+        // Angular acceleration
+        const angularAcceleration = (springForce + dampingForce) / mass;
+
+        this.angularVelocity += angularAcceleration * dt;
+
+        const maxAngularVelocity = 3 / depthFactor;
+        this.angularVelocity = Math.max(
+            -maxAngularVelocity,
+            Math.min(maxAngularVelocity, this.angularVelocity)
+        );
+
+        this.angle += this.angularVelocity * dt;
+
+        // Dead zone
+        if (Math.abs(this.angle) < 0.0001 &&
+            Math.abs(this.angularVelocity) < 0.0001) {
+            this.angle = 0;
+            this.angularVelocity = 0;
+        }
+        this.children.forEach(child => child.update(dt));
     }
 
     generateStem(p0: { x: number, y: number }, baseDirection: { x: number, y: number }) {
@@ -151,13 +241,23 @@ export class BranchNode {
     }
 
     drawCompleteTree(ctx: CanvasRenderingContext2D) {
-        const { P0, P1, P2 } = this;
         ctx.save()
+        ctx.translate(this.P0.x, this.P0.y);
+        ctx.rotate(this.angle);
+
         ctx.beginPath();
-        ctx.moveTo(P0.x, P0.y);
-        ctx.quadraticCurveTo(P1.x, P1.y, P2.x, P2.y);
+        //ctx.moveTo(P0.x, P0.y);
+        ctx.moveTo(0,0)
+        //ctx.quadraticCurveTo(P1.x, P1.y, P2.x, P2.y);
+        ctx.quadraticCurveTo(
+            this.P1.x - this.P0.x,
+            this.P1.y - this.P0.y,
+            this.P2.x - this.P0.x,
+            this.P2.y - this.P0.y
+        );
         ctx.strokeStyle = "black"
         ctx.stroke();
+        if (this.hasFlower && this.flower) this.flower?.draw(ctx, { x: this.P2.x - this.P0.x, y: this.P2.y - this.P0.y })
         ctx.restore()
         for (const child of this.children) {
             child.drawProgressively(ctx);
@@ -167,22 +267,22 @@ export class BranchNode {
     drawCompleteTreeRecursively(ctx: CanvasRenderingContext2D) {
         this.drawCompleteTree(ctx);
     }
+
     drawProgressively(ctx: CanvasRenderingContext2D) {
         if (!this.fullyDrawn) {
-            this.drawByProgress(ctx, ctx.canvas);
+            this.drawByProgress(ctx);
             return;
         }
         if(this.fullyDrawn){
             this.drawCompleteTreeRecursively(ctx)
         }
-        if (this.hasFlower && this.flower) this.flower?.draw(ctx)
         for (const child of this.children) {
             child.drawProgressively(ctx);
         }
 
     }
 
-    drawByProgress(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+    drawByProgress(ctx: CanvasRenderingContext2D) {
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(this.P0.x, this.P0.y);
@@ -196,7 +296,7 @@ export class BranchNode {
         ctx.strokeStyle = "black"
         ctx.stroke();
         ctx.restore();
-        this.progress += 0.05;
+        this.progress += 0.01;
         if (this.progress >= 1) {
             this.progress = 1;
             this.fullyDrawn = true;
@@ -205,6 +305,18 @@ export class BranchNode {
 
     get isSubtreeFullyDrawn(): boolean {
         return this.fullyDrawn && this.children.every(child => child.isSubtreeFullyDrawn);
+    }
+
+    hasFlowerInSubtree(): boolean {
+        if (this.flower) return true;
+
+        for (const child of this.children) {
+            if (child.hasFlowerInSubtree()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

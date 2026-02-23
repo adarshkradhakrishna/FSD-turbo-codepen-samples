@@ -48,7 +48,7 @@ export class Firework extends Effects {
         this.particles.forEach(p => {
             p.x += Math.cos(p.angle) * p.speed;
             p.y += p.vy;
-            p.vy += 1.5 * dt; // gravity effect
+            p.vy += 1.5 * dt;
             p.alpha -= p.decay;
         });
         this.particles = this.particles.filter(p => p.alpha > 0)
